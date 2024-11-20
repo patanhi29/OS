@@ -1,0 +1,72 @@
+Implement  one Reader - One writer classical problem using Thread & Mutex
+
+import threading
+import time
+
+class ReaderWriter:
+    def __init__(self):
+        self.resource = 0
+        self.read_count = 0
+        self.read_mutex = threading.Lock()  # To protect the read_count
+        self.write_mutex = threading.Lock()  # To ensure only one writer at a time
+
+    def read(self, reader_id):
+        # Reader waits for the write_mutex to release the writer
+        with self.read_mutex:
+            self.read_count += 1
+            if self.read_count == 1:  # First reader acquires the writer lock
+                self.write_mutex.acquire()
+
+        print(f"Reader {reader_id} is reading the resource: {self.resource}")
+        time.sleep(2)  # Simulating read operation
+
+        with self.read_mutex:
+            self.read_count -= 1
+            if self.read_count == 0:  # Last reader releases the writer lock
+                self.write_mutex.release()
+
+    def write(self, writer_id):
+        # Writer waits until the resource is free
+        self.write_mutex.acquire()
+        print(f"Writer {writer_id} is writing to the resource.")
+        self.resource += 1  # Simulate writing (resource modification)
+        time.sleep(3)  # Simulating write operation
+        print(f"Writer {writer_id} has finished writing to the resource.")
+        self.write_mutex.release()
+
+def reader_thread(reader_id, rw):
+    rw.read(reader_id)
+
+def writer_thread(writer_id, rw):
+    rw.write(writer_id)
+
+def main():
+    rw = ReaderWriter()
+
+    num_readers = int(input("Enter number of readers: "))
+    num_writers = int(input("Enter number of writers: "))
+
+    threads = []
+
+    # Create reader threads
+    for i in range(num_readers):
+        thread = threading.Thread(target=reader_thread, args=(i + 1, rw))
+        threads.append(thread)
+    
+    # Create writer threads
+    for i in range(num_writers):
+        thread = threading.Thread(target=writer_thread, args=(i + 1, rw))
+        threads.append(thread)
+
+    # Start all threads
+    for thread in threads:
+        thread.start()
+
+    # Wait for all threads to complete
+    for thread in threads:
+        thread.join()
+
+    print("All threads have finished their execution.")
+
+if __name__ == "__main__":
+    main()
