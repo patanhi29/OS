@@ -1,0 +1,69 @@
+Write a program to demonstrate any 5 system calls
+
+import os
+import sys
+import multiprocessing
+
+# Define child process function outside of the main function to make it pickleable
+def child_process():
+    print(f"Child Process: PID = {os.getpid()}, Parent PID = {os.getppid()}")
+    print("Child Process is exiting.")
+    sys.exit()
+
+def demonstrate_fork_simulation():
+    """Simulate fork() using multiprocessing."""
+    print("Simulating fork(): Creating a new process...")
+    
+    # Create a child process
+    child = multiprocessing.Process(target=child_process)
+    child.start()
+    child.join()  # Wait for the child process to finish
+    print(f"Parent Process: PID = {os.getpid()}")
+
+def demonstrate_system_calls():
+    print("Demonstrating System Calls in Python\n")
+
+    # 1. Simulating fork()
+    demonstrate_fork_simulation()
+
+    # 2. exec()
+    print("\n2. exec(): Replacing the current process with a new one...")
+    if os.name != 'nt':  # Check if it's a Unix-based OS
+        pid = os.fork()
+        if pid == 0:
+            os.execlp("echo", "echo", "This is the exec system call demonstration!")
+        else:
+            os.wait()
+    else:
+        print("exec() cannot be demonstrated on this platform (Windows).")
+
+    # 3. getpid()
+    print("\n3. getpid(): Fetching the current process ID...")
+    current_pid = os.getpid()
+    print(f"Current Process ID: {current_pid}")
+
+    # 4. chdir()
+    print("\n4. chdir(): Changing the current working directory...")
+    original_dir = os.getcwd()
+    print(f"Original Directory: {original_dir}")
+    new_dir = "/tmp" if os.name != "nt" else os.environ["TEMP"]  # Use appropriate temp directory
+    os.chdir(new_dir)
+    print(f"Changed to New Directory: {os.getcwd()}")
+    os.chdir(original_dir)  # Revert to the original directory
+    print(f"Reverted to Original Directory: {os.getcwd()}")
+
+    # 5. open()
+    print("\n5. open(): Demonstrating file I/O...")
+    file_name = "system_call_demo.txt"
+    fd = os.open(file_name, os.O_RDWR | os.O_CREAT)
+    os.write(fd, b"This is a demonstration of the open() system call.\n")
+    os.lseek(fd, 0, os.SEEK_SET)  # Go back to the beginning of the file
+    print("File Content:")
+    print(os.read(fd, 100).decode())
+    os.close(fd)
+    os.unlink(file_name)  # Clean up the created file
+
+
+# Run the demonstration
+if __name__ == "__main__":
+    demonstrate_system_calls()
