@@ -1,0 +1,69 @@
+Show the execution of Basic and Advanced Linux commands. (any 5 commands from each type) :
+Basic Linux Commands
+ls - Lists the contents of a directory.
+
+Command: ls
+Output: Lists files and directories.
+Copy code
+Documents  Downloads  Pictures  Videos
+pwd - Prints the current working directory.
+
+Command: pwd
+Output:
+arduino
+Copy code
+/home/user
+cd - Changes the current directory.
+
+Command: cd Documents
+Output: No output, but pwd would now show:
+arduino
+Copy code
+/home/user/Documents
+cp - Copies files or directories.
+
+Command: cp file1.txt file2.txt
+Output: No output; file1.txt is duplicated as file2.txt.
+rm - Deletes files.
+
+Command: rm file2.txt
+Output: No output, but file2.txt is deleted.
+Advanced Linux Commands
+find - Searches for files and directories in a hierarchy.
+
+Command: find /home/user -name "*.txt"
+Output: Lists all .txt files in /home/user and its subdirectories.
+bash
+Copy code
+/home/user/notes.txt
+/home/user/Documents/report.txt
+grep - Searches for patterns within files.
+
+Command: grep "error" /var/log/syslog
+Output: Displays lines containing the word "error" in the syslog file.
+go
+Copy code
+Nov 20 12:00:00 server kernel: error: disk full
+awk - Processes and analyzes text data.
+
+Command: awk '{print $1, $3}' data.txt
+Output: Prints the first and third columns of data.txt.
+Copy code
+Alice  24
+Bob    30
+tar - Archives and compresses files.
+
+Command: tar -cvf archive.tar /home/user/Documents
+Output: Creates an archive of the Documents directory.
+css
+Copy code
+a Documents/
+a Documents/file1.txt
+chmod - Changes file permissions.
+
+Command: chmod 755 script.sh
+Output: No visible output, but script.sh now has executable permissions:
+sql
+Copy code
+-rwxr-xr-x 1 user user 4096 Nov 20 12:34 script.sh
+These commands demonstrate fundamental and advanced operations in Linux, from managing files to analyzing data.
