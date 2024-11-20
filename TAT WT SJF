@@ -1,0 +1,108 @@
+Write a program to compute the Turnaround Time (TAT) and Waiting Time (WT) using the Shortest Job
+First (Preemptive and Non-Preemptive) Scheduling. (enter suitable number of processes, CPU burst, and
+Arrival Time)
+
+# Function for SJF Non-Preemptive Scheduling
+def sjf_non_preemptive(processes, arrival_time, burst_time):
+    n = len(processes)
+    completed = [False] * n
+    completion_time = [0] * n
+    turnaround_time = [0] * n
+    waiting_time = [0] * n
+
+    current_time = 0
+    completed_processes = 0
+
+    while completed_processes < n:
+        # Find the process with the shortest burst time that has arrived
+        shortest_index = -1
+        for i in range(n):
+            if arrival_time[i] <= current_time and not completed[i]:
+                if shortest_index == -1 or burst_time[i] < burst_time[shortest_index]:
+                    shortest_index = i
+
+        if shortest_index == -1:  # No process is ready
+            current_time += 1
+        else:
+            current_time += burst_time[shortest_index]
+            completion_time[shortest_index] = current_time
+            turnaround_time[shortest_index] = completion_time[shortest_index] - arrival_time[shortest_index]
+            waiting_time[shortest_index] = turnaround_time[shortest_index] - burst_time[shortest_index]
+            completed[shortest_index] = True
+            completed_processes += 1
+
+    return completion_time, turnaround_time, waiting_time
+
+
+# Function for SJF Preemptive Scheduling
+def sjf_preemptive(processes, arrival_time, burst_time):
+    n = len(processes)
+    remaining_time = burst_time[:]
+    completion_time = [0] * n
+    turnaround_time = [0] * n
+    waiting_time = [0] * n
+
+    current_time = 0
+    completed_processes = 0
+    while completed_processes < n:
+        # Find the process with the shortest remaining time that has arrived
+        shortest_index = -1
+        for i in range(n):
+            if arrival_time[i] <= current_time and remaining_time[i] > 0:
+                if shortest_index == -1 or remaining_time[i] < remaining_time[shortest_index]:
+                    shortest_index = i
+
+        if shortest_index == -1:  # No process is ready
+            current_time += 1
+        else:
+            remaining_time[shortest_index] -= 1
+            current_time += 1
+
+            if remaining_time[shortest_index] == 0:  # Process is completed
+                completion_time[shortest_index] = current_time
+                turnaround_time[shortest_index] = completion_time[shortest_index] - arrival_time[shortest_index]
+                waiting_time[shortest_index] = turnaround_time[shortest_index] - burst_time[shortest_index]
+                completed_processes += 1
+
+    return completion_time, turnaround_time, waiting_time
+
+
+# Input the number of processes
+n = int(input("Enter the number of processes: "))
+
+# Input process IDs
+processes = [f"P{i+1}" for i in range(n)]
+
+# Input arrival times
+arrival_time = list(map(int, input("Enter the arrival times (space-separated): ").split()))
+
+# Input burst times
+burst_time = list(map(int, input("Enter the burst times (space-separated): ").split()))
+
+# Perform SJF Non-Preemptive Scheduling
+np_completion_time, np_turnaround_time, np_waiting_time = sjf_non_preemptive(processes, arrival_time, burst_time)
+
+# Perform SJF Preemptive Scheduling
+p_completion_time, p_turnaround_time, p_waiting_time = sjf_preemptive(processes, arrival_time, burst_time)
+
+# Display results
+print("\nNon-Preemptive SJF Scheduling:")
+print("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time")
+for i in range(n):
+    print(f"{processes[i]}\t{arrival_time[i]}\t\t{burst_time[i]}\t\t{np_completion_time[i]}\t\t{np_turnaround_time[i]}\t\t{np_waiting_time[i]}")
+
+print("\nPreemptive SJF Scheduling:")
+print("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time")
+for i in range(n):
+    print(f"{processes[i]}\t{arrival_time[i]}\t\t{burst_time[i]}\t\t{p_completion_time[i]}\t\t{p_turnaround_time[i]}\t\t{p_waiting_time[i]}")
+
+# Calculate and display averages
+np_avg_tat = sum(np_turnaround_time) / n
+np_avg_wt = sum(np_waiting_time) / n
+p_avg_tat = sum(p_turnaround_time) / n
+p_avg_wt = sum(p_waiting_time) / n
+
+print(f"\nNon-Preemptive Average Turnaround Time: {np_avg_tat:.2f}")
+print(f"Non-Preemptive Average Waiting Time: {np_avg_wt:.2f}")
+print(f"Preemptive Average Turnaround Time: {p_avg_tat:.2f}")
+print(f"Preemptive Average Waiting Time: {p_avg_wt:.2f}")
