@@ -1,0 +1,89 @@
+Write a program to calculate the number of page faults for a reference string for the
+following page replacement algorithms:
+a)  FIFO         b) LRU         c) Optimal
+
+# Function to implement FIFO Page Replacement Algorithm
+def fifo_page_fault(reference_string, frames):
+    page_faults = 0
+    page_frames = []
+    
+    for page in reference_string:
+        if page not in page_frames:
+            if len(page_frames) < frames:
+                page_frames.append(page)
+            else:
+                page_frames.pop(0)
+                page_frames.append(page)
+            page_faults += 1
+            
+    return page_faults
+
+# Function to implement LRU Page Replacement Algorithm
+def lru_page_fault(reference_string, frames):
+    page_faults = 0
+    page_frames = []
+    
+    for page in reference_string:
+        if page not in page_frames:
+            if len(page_frames) < frames:
+                page_frames.append(page)
+            else:
+                page_frames.pop(0)
+                page_frames.append(page)
+            page_faults += 1
+        else:
+            page_frames.remove(page)
+            page_frames.append(page)
+    
+    return page_faults
+
+# Function to implement Optimal Page Replacement Algorithm
+def optimal_page_fault(reference_string, frames):
+    page_faults = 0
+    page_frames = []
+    
+    for i in range(len(reference_string)):
+        page = reference_string[i]
+        
+        if page not in page_frames:
+            if len(page_frames) < frames:
+                page_frames.append(page)
+            else:
+                future_pages = reference_string[i+1:]
+                page_indices = [future_pages.index(frame) if frame in future_pages else float('inf') for frame in page_frames]
+                page_to_replace = page_frames[page_indices.index(max(page_indices))]
+                page_frames.remove(page_to_replace)
+                page_frames.append(page)
+            page_faults += 1
+    
+    return page_faults
+
+# Main function
+def main():
+    print("Page Replacement Algorithms")
+    print("1. FIFO")
+    print("2. LRU")
+    print("3. Optimal")
+
+    choice = int(input("\nEnter your choice (1/2/3): "))
+    
+    reference_string = list(map(int, input("Enter the reference string (space-separated): ").split()))
+    frames = int(input("Enter the number of frames: "))
+
+    if choice == 1:
+        page_faults = fifo_page_fault(reference_string, frames)
+        print(f"FIFO Page Faults: {page_faults}")
+    
+    elif choice == 2:
+        page_faults = lru_page_fault(reference_string, frames)
+        print(f"LRU Page Faults: {page_faults}")
+    
+    elif choice == 3:
+        page_faults = optimal_page_fault(reference_string, frames)
+        print(f"Optimal Page Faults: {page_faults}")
+    
+    else:
+        print("Invalid choice! Please select a valid option.")
+
+if __name__ == "__main__":
+    main()
