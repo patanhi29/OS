@@ -1,0 +1,112 @@
+Write a program to compute the Turnaround Time (TAT) and Waiting Time (WT) using the Priority
+(Preemptive and Non-Preemptive) Scheduling. (enter suitable number of processes, CPU burst, and Arrival
+Time)
+
+# Function for Priority Non-Preemptive Scheduling
+def priority_non_preemptive(processes, arrival_time, burst_time, priority):
+    n = len(processes)
+    completed = [False] * n
+    completion_time = [0] * n
+    turnaround_time = [0] * n
+    waiting_time = [0] * n
+
+    current_time = 0
+    completed_processes = 0
+
+    while completed_processes < n:
+        # Find the highest-priority process that has arrived
+        highest_priority_index = -1
+        for i in range(n):
+            if arrival_time[i] <= current_time and not completed[i]:
+                if highest_priority_index == -1 or priority[i] < priority[highest_priority_index]:
+                    highest_priority_index = i
+
+        if highest_priority_index == -1:  # No process is ready
+            current_time += 1
+        else:
+            current_time += burst_time[highest_priority_index]
+            completion_time[highest_priority_index] = current_time
+            turnaround_time[highest_priority_index] = completion_time[highest_priority_index] - arrival_time[highest_priority_index]
+            waiting_time[highest_priority_index] = turnaround_time[highest_priority_index] - burst_time[highest_priority_index]
+            completed[highest_priority_index] = True
+            completed_processes += 1
+
+    return completion_time, turnaround_time, waiting_time
+
+
+# Function for Priority Preemptive Scheduling
+def priority_preemptive(processes, arrival_time, burst_time, priority):
+    n = len(processes)
+    remaining_time = burst_time[:]
+    completion_time = [0] * n
+    turnaround_time = [0] * n
+    waiting_time = [0] * n
+
+    current_time = 0
+    completed_processes = 0
+
+    while completed_processes < n:
+        # Find the highest-priority process that has arrived and still has burst time left
+        highest_priority_index = -1
+        for i in range(n):
+            if arrival_time[i] <= current_time and remaining_time[i] > 0:
+                if highest_priority_index == -1 or priority[i] < priority[highest_priority_index]:
+                    highest_priority_index = i
+
+        if highest_priority_index == -1:  # No process is ready
+            current_time += 1
+        else:
+            remaining_time[highest_priority_index] -= 1
+            current_time += 1
+
+            if remaining_time[highest_priority_index] == 0:  # Process is completed
+                completion_time[highest_priority_index] = current_time
+                turnaround_time[highest_priority_index] = completion_time[highest_priority_index] - arrival_time[highest_priority_index]
+                waiting_time[highest_priority_index] = turnaround_time[highest_priority_index] - burst_time[highest_priority_index]
+                completed_processes += 1
+
+    return completion_time, turnaround_time, waiting_time
+
+
+# Input the number of processes
+n = int(input("Enter the number of processes: "))
+
+# Input process IDs
+processes = [f"P{i+1}" for i in range(n)]
+
+# Input arrival times
+arrival_time = list(map(int, input("Enter the arrival times (space-separated): ").split()))
+
+# Input burst times
+burst_time = list(map(int, input("Enter the burst times (space-separated): ").split()))
+
+# Input priorities (lower number = higher priority)
+priority = list(map(int, input("Enter the priorities (space-separated, lower number = higher priority): ").split()))
+
+# Perform Priority Non-Preemptive Scheduling
+np_completion_time, np_turnaround_time, np_waiting_time = priority_non_preemptive(processes, arrival_time, burst_time, priority)
+
+# Perform Priority Preemptive Scheduling
+p_completion_time, p_turnaround_time, p_waiting_time = priority_preemptive(processes, arrival_time, burst_time, priority)
+
+# Display results
+print("\nNon-Preemptive Priority Scheduling:")
+print("Process\tArrival Time\tBurst Time\tPriority\tCompletion Time\tTurnaround Time\tWaiting Time")
+for i in range(n):
+    print(f"{processes[i]}\t{arrival_time[i]}\t\t{burst_time[i]}\t\t{priority[i]}\t\t{np_completion_time[i]}\t\t{np_turnaround_time[i]}\t\t{np_waiting_time[i]}")
+
+print("\nPreemptive Priority Scheduling:")
+print("Process\tArrival Time\tBurst Time\tPriority\tCompletion Time\tTurnaround Time\tWaiting Time")
+for i in range(n):
+    print(f"{processes[i]}\t{arrival_time[i]}\t\t{burst_time[i]}\t\t{priority[i]}\t\t{p_completion_time[i]}\t\t{p_turnaround_time[i]}\t\t{p_waiting_time[i]}")
+
+# Calculate and display averages
+np_avg_tat = sum(np_turnaround_time) / n
+np_avg_wt = sum(np_waiting_time) / n
+p_avg_tat = sum(p_turnaround_time) / n
+p_avg_wt = sum(p_waiting_time) / n
+
+print(f"\nNon-Preemptive Average Turnaround Time: {np_avg_tat:.2f}")
+print(f"Non-Preemptive Average Waiting Time: {np_avg_wt:.2f}")
+print(f"Preemptive Average Turnaround Time: {p_avg_tat:.2f}")
+print(f"Preemptive Average Waiting Time: {p_avg_wt:.2f}")
