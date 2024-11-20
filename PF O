@@ -1,0 +1,55 @@
+Write a program to calculate the number of page faults for a reference string (input any suitable reference
+string) using the Optimal page replacement algorithms.
+
+def optimal_page_replacement(reference_string, num_frames):
+    frames = []  # To store the pages in memory
+    page_faults = 0  # To count the number of page faults
+    
+    for i in range(len(reference_string)):
+        page = reference_string[i]
+        
+        # If the page is not in memory (a page fault)
+        if page not in frames:
+            # If there is space in memory, add the page
+            if len(frames) < num_frames:
+                frames.append(page)
+            else:
+                # If memory is full, find the page to replace
+                # Find the page with the farthest next use in the future
+                farthest = -1
+                page_to_replace = -1
+                for frame in frames:
+                    # Find the next occurrence of this page in the future
+                    if frame not in reference_string[i + 1:]:
+                        page_to_replace = frame
+                        break
+                    else:
+                        # Find the index of the next occurrence
+                        next_use = reference_string[i + 1:].index(frame)
+                        if next_use > farthest:
+                            farthest = next_use
+                            page_to_replace = frame
+                            
+                # Replace the page that has the farthest next use or is not used again
+                frames[frames.index(page_to_replace)] = page
+            page_faults += 1
+            
+        # Printing the current frame after each page access
+        print(f"After accessing page {page}: {frames}")
+    
+    return page_faults
+
+
+def main():
+    # Take input from user
+    reference_string = list(map(int, input("Enter the reference string (space-separated): ").split()))
+    num_frames = int(input("Enter the number of frames: "))
+    
+    # Call Optimal page replacement function
+    page_faults = optimal_page_replacement(reference_string, num_frames)
+    
+    print(f"\nTotal number of page faults: {page_faults}")
+
+
+if __name__ == "__main__":
+    main()
