@@ -1,0 +1,75 @@
+Write a program to check whether a given system is in a safe state or not using Banker’s Deadlock
+Avoidance algorithm (assume suitable data).
+
+def is_safe_state(available, max_resources, allocation):
+    num_processes = len(allocation)
+    num_resources = len(available)
+
+    # Step 1: Calculate Need matrix (Need = Max - Allocation)
+    need = [[max_resources[i][j] - allocation[i][j] for j in range(num_resources)] for i in range(num_processes)]
+
+    # Step 2: Work and Finish vectors
+    work = available[:]  # Copy of available resources
+    finish = [False] * num_processes  # Finish flag for each process
+    safe_sequence = []
+
+    # Step 3: Try to find a safe sequence
+    while len(safe_sequence) < num_processes:
+        progress_made = False
+        
+        for i in range(num_processes):
+            # If process i is not finished and its needs can be met by the current available resources
+            if not finish[i] and all(need[i][j] <= work[j] for j in range(num_resources)):
+                # Simulate the allocation of resources
+                for j in range(num_resources):
+                    work[j] += allocation[i][j]
+                
+                # Mark the process as finished
+                finish[i] = True
+                safe_sequence.append(i)
+                progress_made = True
+                break
+        
+        # If no progress is made, the system is not in a safe state
+        if not progress_made:
+            return False, []
+    
+    # If all processes finished, then the system is in a safe state
+    return True, safe_sequence
+
+
+def input_matrix(num_processes, num_resources, name):
+    """Helper function to take input for resource matrix."""
+    matrix = []
+    print(f"Enter {name} matrix (each row corresponds to a process):")
+    for i in range(num_processes):
+        row = list(map(int, input(f"Enter the row for process {i + 1}: ").split()))
+        matrix.append(row)
+    return matrix
+
+
+def main():
+    # Number of processes and resources
+    num_processes = int(input("Enter the number of processes: "))
+    num_resources = int(input("Enter the number of resource types: "))
+
+    # Input the Available resources
+    available = list(map(int, input(f"Enter the available resources (space-separated for {num_resources} types): ").split()))
+
+    # Input the Maximum demand matrix
+    max_resources = input_matrix(num_processes, num_resources, "Max")
+
+    # Input the Allocation matrix
+    allocation = input_matrix(num_processes, num_resources, "Allocation")
+
+    # Check if the system is in a safe state
+    safe, safe_sequence = is_safe_state(available, max_resources, allocation)
+
+    if safe:
+        print("\nThe system is in a safe state.")
+        print("Safe sequence:", [f"P{i + 1}" for i in safe_sequence])
+    else:
+        print("\nThe system is not in a safe state.")
+
+if __name__ == "__main__":
+    main()
