@@ -1,0 +1,84 @@
+Write a program to compute the Turnaround Time (TAT) and Waiting Time (WT) using the Round Robin
+Scheduling. (enter suitable number of processes, CPU burst, and Arrival Time)
+
+def round_robin(processes, arrival_time, burst_time, quantum):
+    n = len(processes)
+    remaining_time = burst_time[:]  # Remaining burst time for each process
+    completion_time = [0] * n
+    turnaround_time = [0] * n
+    waiting_time = [0] * n
+
+    current_time = 0  # Tracks the current time
+    queue = []  # Ready queue
+    visited = [False] * n  # Tracks if a process has been added to the queue
+
+    # Add the first processes that arrive at time 0 to the queue
+    for i in range(n):
+        if arrival_time[i] <= current_time:
+            queue.append(i)
+            visited[i] = True
+
+    while queue:
+        # Get the index of the process at the front of the queue
+        process_index = queue.pop(0)
+
+        # Execute the process for a time slice or until it finishes
+        if remaining_time[process_index] > quantum:
+            current_time += quantum
+            remaining_time[process_index] -= quantum
+        else:
+            current_time += remaining_time[process_index]
+            remaining_time[process_index] = 0
+            completion_time[process_index] = current_time
+
+        # Check if new processes have arrived and add them to the queue
+        for i in range(n):
+            if (
+                arrival_time[i] <= current_time
+                and not visited[i]
+                and remaining_time[i] > 0
+            ):
+                queue.append(i)
+                visited[i] = True
+
+        # If the current process is not finished, add it back to the queue
+        if remaining_time[process_index] > 0:
+            queue.append(process_index)
+
+    # Calculate Turnaround Time and Waiting Time
+    for i in range(n):
+        turnaround_time[i] = completion_time[i] - arrival_time[i]
+        waiting_time[i] = turnaround_time[i] - burst_time[i]
+
+    return completion_time, turnaround_time, waiting_time
+
+
+# Input the number of processes
+n = int(input("Enter the number of processes: "))
+
+# Input process IDs
+processes = [f"P{i+1}" for i in range(n)]
+
+# Input arrival times
+arrival_time = list(map(int, input("Enter the arrival times (space-separated): ").split()))
+
+# Input burst times
+burst_time = list(map(int, input("Enter the burst times (space-separated): ").split()))
+
+# Input time quantum
+quantum = int(input("Enter the time quantum: "))
+
+# Perform Round Robin Scheduling
+completion_time, turnaround_time, waiting_time = round_robin(processes, arrival_time, burst_time, quantum)
+
+# Display results
+print("\nRound Robin Scheduling:")
+print("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time")
+for i in range(n):
+    print(f"{processes[i]}\t{arrival_time[i]}\t\t{burst_time[i]}\t\t{completion_time[i]}\t\t{turnaround_time[i]}\t\t{waiting_time[i]}")
+
+# Calculate and display averages
+avg_tat = sum(turnaround_time) / n
+avg_wt = sum(waiting_time) / n
+print(f"\nAverage Turnaround Time: {avg_tat:.2f}")
+print(f"Average Waiting Time: {avg_wt:.2f}")
