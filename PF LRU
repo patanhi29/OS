@@ -1,0 +1,41 @@
+Write a program to calculate the number of page faults for a reference string (input any suitable reference
+string) using the Least Recently Used (LRU) page replacement algorithms.
+
+from collections import deque
+
+def lru_page_replacement(reference_string, num_frames):
+    # Initialize the frame as an empty list
+    frames = deque(maxlen=num_frames)
+    page_faults = 0
+    
+    for page in reference_string:
+        # If page is not in frames (a page fault)
+        if page not in frames:
+            if len(frames) == num_frames:
+                # Pop the leftmost (least recently used) page
+                frames.popleft()
+            # Add the new page to the rightmost (most recently used) position
+            frames.append(page)
+            page_faults += 1
+        else:
+            # If page is already in frames, we remove it and re-add it to mark it as recently used
+            frames.remove(page)
+            frames.append(page)
+        
+        # Printing the current frame after each page access
+        print(f"After accessing page {page}: {list(frames)}")
+    
+    return page_faults
+
+def main():
+    # Take input from user
+    reference_string = list(map(int, input("Enter the reference string (space-separated): ").split()))
+    num_frames = int(input("Enter the number of frames: "))
+    
+    # Call LRU page replacement function
+    page_faults = lru_page_replacement(reference_string, num_frames)
+    
+    print(f"\nTotal number of page faults: {page_faults}")
+
+if __name__ == "__main__":
+    main()
