@@ -1,0 +1,37 @@
+Write a program to calculate the number of page faults for a reference string (input any suitable reference
+string) using First In First Out (FIFO) page replacement algorithms.
+
+def fifo_page_replacement(reference_string, num_frames):
+    # Initialize the frame as an empty list
+    frames = []
+    page_faults = 0
+    for page in reference_string:
+        # If page is not in frames (a page fault)
+        if page not in frames:
+            # If there's space in memory, add the page
+            if len(frames) < num_frames:
+                frames.append(page)
+            else:
+                # Replace the oldest page (first element)
+                frames.pop(0)
+                frames.append(page)
+            page_faults += 1
+        # Printing the current frame after each page access
+        print(f"After accessing page {page}: {frames}")
+    
+    return page_faults
+
+
+def main():
+    # Take input from user
+    reference_string = list(map(int, input("Enter the reference string (space-separated): ").split()))
+    num_frames = int(input("Enter the number of frames: "))
+    
+    # Call FIFO page replacement function
+    page_faults = fifo_page_replacement(reference_string, num_frames)
+    
+    print(f"\nTotal number of page faults: {page_faults}")
+
+
+if __name__ == "__main__":
+    main()
