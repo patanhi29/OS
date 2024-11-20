@@ -1,0 +1,284 @@
+Write a program to compute the finish time, turnaround time, and waiting time for the following algorithms:
+a) First come First serve
+b) Shortest Job First (Preemptive and Non Preemptive)
+c) Priority (Preemptive and Non Preemptive)
+d) Round robin
+
+def fcfs_scheduling():
+    print("\nFirst Come First Serve (FCFS) Scheduling")
+    
+    n = int(input("Enter number of processes: "))
+    
+    # Get process details
+    processes = []
+    arrival_times = []
+    burst_times = []
+    
+    for i in range(n):
+        pid = input(f"Enter process ID for process {i+1}: ")
+        arrival_time = int(input(f"Enter arrival time for process {pid}: "))
+        burst_time = int(input(f"Enter burst time for process {pid}: "))
+        processes.append(pid)
+        arrival_times.append(arrival_time)
+        burst_times.append(burst_time)
+    
+    # Sort processes by arrival time
+    arrival_order = sorted(range(n), key=lambda x: arrival_times[x])
+    arrival_times = [arrival_times[i] for i in arrival_order]
+    burst_times = [burst_times[i] for i in arrival_order]
+    processes = [processes[i] for i in arrival_order]
+    
+    # Initialize variables
+    finish_times = [0] * n
+    turnaround_times = [0] * n
+    waiting_times = [0] * n
+    start_time = 0
+    
+    # FCFS: Calculate finish time, turnaround time, and waiting time
+    for i in range(n):
+        start_time = max(start_time, arrival_times[i])
+        finish_times[i] = start_time + burst_times[i]
+        turnaround_times[i] = finish_times[i] - arrival_times[i]
+        waiting_times[i] = turnaround_times[i] - burst_times[i]
+        start_time = finish_times[i]
+    
+    # Display Results
+    print("\nProcess | Arrival Time | Burst Time | Finish Time | Turnaround Time | Waiting Time")
+    for i in range(n):
+        print(f"{processes[i]}      | {arrival_times[i]}           | {burst_times[i]}          | {finish_times[i]}         | {turnaround_times[i]}              | {waiting_times[i]}")
+    
+    return finish_times, turnaround_times, waiting_times
+
+
+def sjf_scheduling():
+    print("\nShortest Job First (SJF) Scheduling (Non-Preemptive)")
+
+    n = int(input("Enter number of processes: "))
+    
+    # Get process details
+    processes = []
+    arrival_times = []
+    burst_times = []
+    
+    for i in range(n):
+        pid = input(f"Enter process ID for process {i+1}: ")
+        arrival_time = int(input(f"Enter arrival time for process {pid}: "))
+        burst_time = int(input(f"Enter burst time for process {pid}: "))
+        processes.append(pid)
+        arrival_times.append(arrival_time)
+        burst_times.append(burst_time)
+    
+    # Sort processes by arrival time
+    process_data = sorted(zip(arrival_times, burst_times, processes), key=lambda x: (x[0], x[1]))
+    arrival_times, burst_times, processes = zip(*process_data)
+    
+    # Initialize variables
+    finish_times = [0] * n
+    turnaround_times = [0] * n
+    waiting_times = [0] * n
+    start_time = 0
+    completed = [False] * n
+    remaining_burst_times = list(burst_times)
+
+    # SJF Non-Preemptive
+    for t in range(min(arrival_times), max(arrival_times) + max(burst_times)):
+        available_processes = [i for i in range(n) if arrival_times[i] <= t and not completed[i]]
+        
+        if available_processes:
+            next_process = min(available_processes, key=lambda i: remaining_burst_times[i])
+            completed[next_process] = True
+            finish_times[next_process] = t + burst_times[next_process]
+            turnaround_times[next_process] = finish_times[next_process] - arrival_times[next_process]
+            waiting_times[next_process] = turnaround_times[next_process] - burst_times[next_process]
+            t += burst_times[next_process] - 1
+
+    # Display Results
+    print("\nProcess | Arrival Time | Burst Time | Finish Time | Turnaround Time | Waiting Time")
+    for i in range(n):
+        print(f"{processes[i]}      | {arrival_times[i]}           | {burst_times[i]}          | {finish_times[i]}         | {turnaround_times[i]}              | {waiting_times[i]}")
+    
+    return finish_times, turnaround_times, waiting_times
+
+
+def priority_scheduling_preemptive():
+    print("\nPriority Scheduling (Preemptive)")
+    
+    n = int(input("Enter number of processes: "))
+    
+    processes = []
+    arrival_times = []
+    burst_times = []
+    priorities = []
+    
+    for i in range(n):
+        pid = input(f"Enter process ID for process {i+1}: ")
+        arrival_time = int(input(f"Enter arrival time for process {pid}: "))
+        burst_time = int(input(f"Enter burst time for process {pid}: "))
+        priority = int(input(f"Enter priority for process {pid} (lower number means higher priority): "))
+        processes.append(pid)
+        arrival_times.append(arrival_time)
+        burst_times.append(burst_time)
+        priorities.append(priority)
+    
+    # Initialize variables
+    remaining_burst_times = list(burst_times)
+    finish_times = [0] * n
+    turnaround_times = [0] * n
+    waiting_times = [0] * n
+    start_time = 0
+    completed = [False] * n
+    
+    time = 0
+    while not all(completed):
+        ready_queue = []
+        for i in range(n):
+            if arrival_times[i] <= time and not completed[i]:
+                ready_queue.append(i)
+        
+        if ready_queue:
+            highest_priority_process = min(ready_queue, key=lambda i: priorities[i])
+            remaining_burst_times[highest_priority_process] -= 1
+            
+            if remaining_burst_times[highest_priority_process] == 0:
+                completed[highest_priority_process] = True
+                finish_times[highest_priority_process] = time + 1
+                turnaround_times[highest_priority_process] = finish_times[highest_priority_process] - arrival_times[highest_priority_process]
+                waiting_times[highest_priority_process] = turnaround_times[highest_priority_process] - burst_times[highest_priority_process]
+        
+        time += 1
+    
+    # Display Results
+    print("\nProcess | Arrival Time | Burst Time | Finish Time | Turnaround Time | Waiting Time")
+    for i in range(n):
+        print(f"{processes[i]}      | {arrival_times[i]}           | {burst_times[i]}          | {finish_times[i]}         | {turnaround_times[i]}              | {waiting_times[i]}")
+    
+    return finish_times, turnaround_times, waiting_times
+
+
+def priority_scheduling_non_preemptive():
+    print("\nPriority Scheduling (Non-Preemptive)")
+    
+    n = int(input("Enter number of processes: "))
+    
+    processes = []
+    arrival_times = []
+    burst_times = []
+    priorities = []
+    
+    for i in range(n):
+        pid = input(f"Enter process ID for process {i+1}: ")
+        arrival_time = int(input(f"Enter arrival time for process {pid}: "))
+        burst_time = int(input(f"Enter burst time for process {pid}: "))
+        priority = int(input(f"Enter priority for process {pid} (lower number means higher priority): "))
+        processes.append(pid)
+        arrival_times.append(arrival_time)
+        burst_times.append(burst_time)
+        priorities.append(priority)
+    
+    # Sort processes by arrival time and priority
+    process_data = sorted(zip(arrival_times, burst_times, priorities, processes), key=lambda x: (x[0], x[2]))
+    arrival_times, burst_times, priorities, processes = zip(*process_data)
+    
+    # Initialize variables
+    finish_times = [0] * n
+    turnaround_times = [0] * n
+    waiting_times = [0] * n
+    start_time = 0
+    completed = [False] * n
+
+    # Priority Scheduling (Non-Preemptive)
+    for t in range(min(arrival_times), max(arrival_times) + max(burst_times)):
+        ready_queue = [i for i in range(n) if arrival_times[i] <= t and not completed[i]]
+        
+        if ready_queue:
+            next_process = min(ready_queue, key=lambda i: priorities[i])
+            completed[next_process] = True
+            finish_times[next_process] = t + burst_times[next_process]
+            turnaround_times[next_process] = finish_times[next_process] - arrival_times[next_process]
+            waiting_times[next_process] = turnaround_times[next_process] - burst_times[next_process]
+            t += burst_times[next_process] - 1
+
+    # Display Results
+    print("\nProcess | Arrival Time | Burst Time | Finish Time | Turnaround Time | Waiting Time")
+    for i in range(n):
+        print(f"{processes[i]}      | {arrival_times[i]}           | {burst_times[i]}          | {finish_times[i]}         | {turnaround_times[i]}              | {waiting_times[i]}")
+    
+    return finish_times, turnaround_times, waiting_times
+
+
+def round_robin_scheduling():
+    print("\nRound Robin Scheduling")
+    
+    n = int(input("Enter number of processes: "))
+    
+    # Get process details
+    processes = []
+    arrival_times = []
+    burst_times = []
+    
+    for i in range(n):
+        pid = input(f"Enter process ID for process {i+1}: ")
+        arrival_time = int(input(f"Enter arrival time for process {pid}: "))
+        burst_time = int(input(f"Enter burst time for process {pid}: "))
+        processes.append(pid)
+        arrival_times.append(arrival_time)
+        burst_times.append(burst_time)
+    
+    quantum = int(input("\nEnter time quantum: "))
+    
+    # Initialize variables
+    remaining_burst_times = list(burst_times)
+    finish_times = [0] * n
+    turnaround_times = [0] * n
+    waiting_times = [0] * n
+    start_time = 0
+    completed = [False] * n
+    
+    time = 0
+    while not all(completed):
+        for i in range(n):
+            if arrival_times[i] <= time and not completed[i]:
+                if remaining_burst_times[i] > quantum:
+                    remaining_burst_times[i] -= quantum
+                    time += quantum
+                else:
+                    time += remaining_burst_times[i]
+                    remaining_burst_times[i] = 0
+                    completed[i] = True
+                    finish_times[i] = time
+                    turnaround_times[i] = finish_times[i] - arrival_times[i]
+                    waiting_times[i] = turnaround_times[i] - burst_times[i]
+
+    # Display Results
+    print("\nProcess | Arrival Time | Burst Time | Finish Time | Turnaround Time | Waiting Time")
+    for i in range(n):
+        print(f"{processes[i]}      | {arrival_times[i]}           | {burst_times[i]}          | {finish_times[i]}         | {turnaround_times[i]}              | {waiting_times[i]}")
+
+    return finish_times, turnaround_times, waiting_times
+
+
+def main():
+    print("Choose a Scheduling Algorithm:")
+    print("1. First Come First Serve (FCFS)")
+    print("2. Shortest Job First (SJF) - Non-Preemptive")
+    print("3. Priority Scheduling (Preemptive)")
+    print("4. Priority Scheduling (Non-Preemptive)")
+    print("5. Round Robin")
+    
+    choice = int(input("\nEnter your choice: "))
+    
+    if choice == 1:
+        fcfs_scheduling()
+    elif choice == 2:
+        sjf_scheduling()
+    elif choice == 3:
+        priority_scheduling_preemptive()
+    elif choice == 4:
+        priority_scheduling_non_preemptive()
+    elif choice == 5:
+        round_robin_scheduling()
+    else:
+        print("Invalid choice! Please choose a valid option.")
+
+if __name__ == "__main__":
+    main()
