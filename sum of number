@@ -1,0 +1,39 @@
+Write a shell Script to find the sum of digits of the entered number
+
+#!/bin/bash
+
+# Prompt user to enter a number
+echo -n "Enter a number: "
+read number
+
+# Initialize sum variable
+sum=0
+
+# Loop through each digit of the number
+while [ $number -gt 0 ]; do
+    # Extract the last digit
+    digit=$((number % 10))
+    # Add the digit to the sum
+    sum=$((sum + digit))
+    # Remove the last digit
+    number=$((number / 10))
+done
+
+# Output the result
+echo "The sum of the digits is: $sum"
+
+OR
+
+# Prompt the user to enter a number
+number = input("Enter a number: ")
+
+# Initialize sum variable
+sum_of_digits = 0
+
+# Iterate through each character in the number (treated as a string)
+for digit in number:
+    # Convert the character to an integer and add it to the sum
+    sum_of_digits += int(digit)
+
+# Output the result
+print("The sum of the digits is:", sum_of_digits)
